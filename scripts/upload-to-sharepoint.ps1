@@ -12,20 +12,20 @@ try {
     Write-Output "Folder Path: $folderPath"
     Write-Output "Artifact Path: $artifactPath"
 
-    Write-Output "Download the SharePoint Client Components SDK"
-    # Download the SharePoint Client Components SDK
-    $clientComponentsUrl = "https://download.microsoft.com/download/0/4/6/046BCBA8-3B4E-4D5A-B6A3-5C0B246A4A18/SharePointClientComponents_x64.msi"
-    $clientComponentsPath = "$env:TEMP/SharePointClientComponents_x64.msi"
-    Invoke-WebRequest -Uri $clientComponentsUrl -OutFile $clientComponentsPath
+    Write-Output "Load the required assemblies directly from the NuGet package source"
+    # Load the required assemblies directly from the NuGet package source
+    $nugetUrl = "https://www.nuget.org/api/v2/package/Microsoft.SharePointOnline.CSOM/"
+    $nugetPath = "$env:TEMP/Microsoft.SharePointOnline.CSOM.zip"
+    Invoke-WebRequest -Uri $nugetUrl -OutFile $nugetPath
 
-    Write-Output "Extract the assemblies from the MSI"
-    # Extract the assemblies from the MSI
-    $msiexec = "/usr/bin/msiexec"
-    Start-Process -FilePath $msiexec -ArgumentList "/a $clientComponentsPath /qb TARGETDIR=$env:TEMP/SharePointClientComponents" -Wait
+    Write-Output "Extract the NuGet package"
+    # Extract the NuGet package
+    $nugetExtractPath = "$env:TEMP/SharePointClientComponents"
+    Expand-Archive -Path $nugetPath -DestinationPath $nugetExtractPath
 
     Write-Output "Load the required assemblies"
     # Load the required assemblies
-    $assemblyPath = "$env:TEMP/SharePointClientComponents/Program Files/Common Files/Microsoft Shared/Web Server Extensions/16/ISAPI"
+    $assemblyPath = "$nugetExtractPath/lib/netstandard2.0"
     Add-Type -Path "$assemblyPath/Microsoft.SharePoint.Client.dll"
     Add-Type -Path "$assemblyPath/Microsoft.SharePoint.Client.Runtime.dll"
 
@@ -48,10 +48,7 @@ try {
     $folder = $web.GetFolderByServerRelativeUrl($folderPath)
     $ctx.Load($folder)
     $ctx.ExecuteQuery()
-    
-    Write-Output $ctx
-    
-    Write-Output "Check if folder exists, if not create it"
+
     # Check if folder exists, if not create it
     if (-not ($folder.Exists)) {
         Write-Output "Folder does not exist. Creating folder..."
@@ -60,7 +57,6 @@ try {
         $ctx.ExecuteQuery()
     }
 
-    Write-Output "Upload files to SharePoint"
     # Upload files to SharePoint
     function Upload-Files($folder, $localPath) {
         $files = Get-ChildItem -Path $localPath
