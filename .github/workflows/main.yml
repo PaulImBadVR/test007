@@ -34,6 +34,21 @@ jobs:
         with:
           name: Build
           path: build
-            
-      
         
+      # Install PowerShell
+      - name: Install PowerShell
+        run: |
+        sudo apt-get update
+        sudo apt-get install -y wget apt-transport-https software-properties-common
+        wget -q https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb
+        sudo dpkg -i packages-microsoft-prod.deb
+        sudo apt-get update
+        sudo apt-get install -y powershell
+      
+      # Upload to SharePoint
+      - name: Upload to SharePoint
+        env:
+          SHAREPOINT_SITE_URL: ${{ secrets.SHAREPOINT_SITE_URL }}
+          SHAREPOINT_USERNAME: ${{ secrets.SHAREPOINT_USERNAME }}
+          SHAREPOINT_PASSWORD: ${{ secrets.SHAREPOINT_PASSWORD }}
+        run: pwsh -File scripts/upload-to-sharepoint.ps1
