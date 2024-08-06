@@ -7,27 +7,6 @@ jobs:
     name: Build my project ✨
     runs-on: ubuntu-latest
     steps:
-      
-      # Cleanup Docker layers to free space
-      - name: Cleanup Docker
-        run: |
-          docker system prune -f
-        
-      # Checkout
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          lfs: true
-
-      # Build
-      - name: Build project
-        uses: game-ci/unity-builder@v4
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        with:
-          targetPlatform: StandaloneWindows
 
       # Output
       - uses: actions/upload-artifact@v3
