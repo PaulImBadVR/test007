@@ -7,6 +7,12 @@ jobs:
     name: Build my project ✨
     runs-on: ubuntu-latest
     steps:
+      
+      # Cleanup Docker layers to free space
+      - name: Cleanup Docker
+        run: |
+          docker system prune -f
+        
       # Checkout
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -36,3 +42,6 @@ jobs:
         with:
           name: Build
           path: build
+            
+      
+        
