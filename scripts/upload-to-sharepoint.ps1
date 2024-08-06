@@ -2,18 +2,23 @@
 $siteUrl = $env:SHAREPOINT_SITE_URL
 $username = $env:SHAREPOINT_USERNAME
 $password = $env:SHAREPOINT_PASSWORD
-$folderPath = "Shared Documents/YourFolder" # Change this to your SharePoint folder path
+$folderPath = "Documents" # Change this to your SharePoint folder path
 $artifactPath = "build" # The local path to your build artifacts
 
 # Error handling
 try {
+    # Print out variables for debugging
+    Write-Output "SharePoint Site URL: $siteUrl"
+    Write-Output "Folder Path: $folderPath"
+    Write-Output "Artifact Path: $artifactPath"
+
     # Download the SharePoint Client Components SDK
     $clientComponentsUrl = "https://download.microsoft.com/download/0/4/6/046BCBA8-3B4E-4D5A-B6A3-5C0B246A4A18/SharePointClientComponents_x64.msi"
     $clientComponentsPath = "$env:TEMP/SharePointClientComponents_x64.msi"
     Invoke-WebRequest -Uri $clientComponentsUrl -OutFile $clientComponentsPath
 
     # Extract the assemblies from the MSI
-    $msiexec = "C:\Windows\System32\msiexec.exe"
+    $msiexec = "/usr/bin/msiexec"
     Start-Process -FilePath $msiexec -ArgumentList "/a $clientComponentsPath /qb TARGETDIR=$env:TEMP/SharePointClientComponents" -Wait
 
     # Load the required assemblies
@@ -28,6 +33,23 @@ try {
     # Connect to SharePoint
     $ctx = New-Object Microsoft.SharePoint.Client.ClientContext($siteUrl)
     $ctx.Credentials = $credential
+
+    # Get the target folder
+    $web = $ctx.Web
+    $ctx.Load($web)
+    $ctx.ExecuteQuery()
+
+    $folder = $web.GetFolderByServerRelativeUrl($folderPath)
+    $ctx.Load($folder)
+    $ctx.ExecuteQuery()
+
+    # Check if folder exists, if not create it
+    if (-not ($folder.Exists)) {
+        Write-Output "Folder does not exist. Creating folder..."
+        $newFolder = $web.Folders.Add($folderPath)
+        $ctx.Load($newFolder)
+        $ctx.ExecuteQuery()
+    }
 
     # Upload files to SharePoint
     function Upload-Files($folder, $localPath) {
@@ -44,15 +66,6 @@ try {
             $fileStream.Close()
         }
     }
-
-    # Get the target folder
-    $web = $ctx.Web
-    $ctx.Load($web)
-    $ctx.ExecuteQuery()
-
-    $folder = $web.GetFolderByServerRelativeUrl($folderPath)
-    $ctx.Load($folder)
-    $ctx.ExecuteQuery()
 
     # Upload the artifacts
     Upload-Files $folder $artifactPath
