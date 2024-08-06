@@ -15,12 +15,12 @@ try {
     Write-Output "Load the required assemblies directly from the NuGet package source"
     # Load the required assemblies directly from the NuGet package source
     $nugetUrl = "https://www.nuget.org/api/v2/package/Microsoft.SharePointOnline.CSOM/"
-    $nugetPath = "$env:TEMP/Microsoft.SharePointOnline.CSOM.zip"
+    $nugetPath = "/tmp/Microsoft.SharePointOnline.CSOM.zip" # Ensure this is a writable path
     Invoke-WebRequest -Uri $nugetUrl -OutFile $nugetPath
 
     Write-Output "Extract the NuGet package"
     # Extract the NuGet package
-    $nugetExtractPath = "$env:TEMP/SharePointClientComponents"
+    $nugetExtractPath = "/tmp/SharePointClientComponents"
     Expand-Archive -Path $nugetPath -DestinationPath $nugetExtractPath
 
     Write-Output "Load the required assemblies"
@@ -28,8 +28,8 @@ try {
     $assemblyPath = "$nugetExtractPath/lib/netstandard2.0"
     Add-Type -Path "$assemblyPath/Microsoft.SharePoint.Client.dll"
     Add-Type -Path "$assemblyPath/Microsoft.SharePoint.Client.Runtime.dll"
-
-    Write-Output "Convert password to a secure string"
+    
+    Write-Output ""
     # Convert password to a secure string
     $securePassword = ConvertTo-SecureString $password -AsPlainText -Force
     $credential = New-Object System.Management.Automation.PSCredential ($username, $securePassword)
@@ -49,6 +49,7 @@ try {
     $ctx.Load($folder)
     $ctx.ExecuteQuery()
 
+    Write-Output "Check if folder exists, if not create it"
     # Check if folder exists, if not create it
     if (-not ($folder.Exists)) {
         Write-Output "Folder does not exist. Creating folder..."
