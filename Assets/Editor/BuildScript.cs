@@ -8,6 +8,6 @@ public class BuildScript
         Debug.Log("BuildScript.BuildAndroid is called");
         string[] scenes = { "Assets/Scenes/SampleScene.unity" };
         BuildPipeline.BuildPlayer(scenes, "Builds/AndroidBuild.apk", BuildTarget.Android, BuildOptions.None);
-        Debug.Log("BuildScript.BuildAndroid is exiting");
+        Debug.Log("BuildScript.BuildAndroid is exiting. pull");
     }
 }
