@@ -2,7 +2,7 @@ using UnityEditor;
 
 public class BuildScript
 {
-    public static void PerformBuild()
+    public static void BuildAndroid()
     {
         string[] scenes = { "Assets/SampleScene.unity" };
         string outputPath = "Builds/WindowsBuild.exe";
