@@ -7,8 +7,8 @@ public class BuildScript
     {
         Debug.Log("BuildScript.BuildAndroid is called");
         string[] scenes = { "Assets/SampleScene.unity" };
-        string outputPath = "Builds/WindowsBuild.exe";
-        BuildPipeline.BuildPlayer(scenes, outputPath, BuildTarget.StandaloneWindows64, BuildOptions.None);
+        string outputPath = "aaa.apk";
+        BuildPipeline.BuildPlayer(scenes, outputPath, BuildTarget.Android, BuildOptions.None);
         Debug.Log("BuildScript.BuildAndroid is exiting");
     }
 }
